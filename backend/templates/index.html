@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chat</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; }
+        #response { background: #f4f4f4; padding: 15px; margin-top: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h2>AI Chat </h2>
+    <div style="margin-bottom:8px;">
+        <input type="text" id="apiKey" placeholder="API Key (x-api-key)" style="width: 60%"> 
+        <button id="saveKey">Save</button>
+        <label style="margin-left:8px"><input type="checkbox" id="persistKey"> persist</label>
+    </div>
+    <input type="text" id="userPrompt" placeholder="Type something..." style="width: 80%;">
+    <button onclick="sendPrompt()">Send</button>
+
+    <div id="response">The AI's answer will appear here.</div>
+
+    <script>
+        // Load persisted key from localStorage if available
+        let savedKey = '';
+        const stored = localStorage.getItem('apiKey');
+        if (stored) {
+            savedKey = stored;
+            document.getElementById('apiKey').value = stored;
+            document.getElementById('persistKey').checked = true;
+        }
+
+        document.getElementById('saveKey').addEventListener('click', () => {
+            savedKey = document.getElementById('apiKey').value.trim();
+            const persist = document.getElementById('persistKey').checked;
+            if (persist) localStorage.setItem('apiKey', savedKey);
+            else localStorage.removeItem('apiKey');
+            alert('API key saved for this session');
+        });
+
+        async function sendPrompt() {
+            const prompt = document.getElementById('userPrompt').value;
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerText = "Thinking...";
+
+            const headers = { 'Content-Type': 'application/json' };
+            if (savedKey) headers['x-api-key'] = savedKey;
+
+            // Streamed fetch to /stream
+            try {
+                responseDiv.innerText = '';
+                const resp = await fetch('/stream', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    responseDiv.innerText = err.detail || JSON.stringify(err);
+                    return;
+                }
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let done = false;
+                responseDiv.innerText = 'Thinking...\n';
+                while (!done) {
+                    const { value, done: d } = await reader.read();
+                    done = d;
+                    if (value) {
+                        const chunk = decoder.decode(value);
+                        responseDiv.innerText += chunk;
+                    }
+                }
+            } catch (e) {
+                responseDiv.innerText = 'Network error: ' + e;
+            }
+        }
+    </script>
+</body>
+</html>
