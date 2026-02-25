@@ -1,3 +1,5 @@
 FastAPI
+uvicorn
 ollama
-unicorn 
+gunicorn
+python-dotenv
