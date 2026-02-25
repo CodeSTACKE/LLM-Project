@@ -13,7 +13,7 @@ WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY backend/requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
 
 # Copy app code
 COPY backend/ .
