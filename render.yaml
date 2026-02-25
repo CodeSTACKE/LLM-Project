@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: llm-chat-app
+    runtime: docker
+    plan: free
+    dockerfile: ./Dockerfile
+    envVars:
+      - key: API_KEY
+        scope: run
+        value: devkey
+      - key: DEV_MODE
+        scope: run
+        value: "true"
+    healthCheckPath: /health
+    exposedPort: 8000

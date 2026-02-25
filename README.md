@@ -78,11 +78,56 @@ curl -X POST -H "Content-Type: application/json" -H "x-api-key: <KEY>" \
   -d '{"prompt":"Hello"}' http://127.0.0.1:8000/ask
 ```
 
+## Docker & Deployment
+
+### Local Docker (testing)
+
+```bash
+docker-compose up --build
+```
+
+Open `http://localhost:8000/` to test.
+
+### Deploy to Render (free)
+
+1. **Create a Render account** at [render.com](https://render.com) (free tier available).
+
+2. **Connect your GitHub repo:**
+   - Go to Render Dashboard → New → Web Service
+   - Connect your GitHub repository
+   - Select branch `main`
+
+3. **Configure the service:**
+   - **Runtime:** Docker
+   - **Root Directory:** (leave empty)
+   - **Build Command:** (leave as default)
+   - **Start Command:** (leave as default — uses Dockerfile)
+
+4. **Set environment variables** in Render (optional):
+   - `API_KEY` — your API key
+   - `DEV_MODE` — `true` for development
+
+5. **Deploy:** Click "Create Web Service" — Render will build and deploy automatically.
+
+6. **Auto-deploy on push:** Every time you push to `main`, Render automatically rebuilds and deploys.
+
+**Note:** Render's free tier has limited compute (0.5GB RAM). First request may be slow as Ollama initializes. Production deployments would need a paid tier.
+
+### Alternative: Self-host with Docker
+
+Run on your own server:
+
+```bash
+docker build -t llm-chat .
+docker run -p 8000:8000 -p 11434:11434 -e API_KEY=yourkey llm-chat
+```
+
 ## Notes
 
 - This is intended for local prototyping and demos — not production-ready.
 - API key credits live only in memory and reset on server restart.
 - The UI stores the API key in `localStorage` if you enable `persist` in the page.
+- Ollama models are downloaded on first use (can be slow on limited bandwidth).
 
 ## License
 
