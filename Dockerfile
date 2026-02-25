@@ -19,7 +19,13 @@ RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
 COPY backend/ .
 
 # Expose ports: 8000 for FastAPI, 11434 for Ollama
-EXPOSE 8000 11434
+#EXPOSE 8000 11434
 
 # Start both Ollama and FastAPI
-CMD ollama serve & sleep 5 && uvicorn app:app --host 0.0.0.0 --port 8000
+#CMD ollama serve & sleep 5 && uvicorn app:app --host 0.0.0.0 --port 8000
+# ... after copying your code
+RUN chmod +x start.sh
+
+# Overwrite the base image entrypoint to allow our script to run
+ENTRYPOINT []
+CMD ["./start.sh"]
